@@ -4,6 +4,8 @@ import prisma from '@/lib/prisma';
 import { checkIdempotency, saveIdempotency } from '@/lib/idempotency';
 import { releaseExpiredReservations } from '@/lib/cleanup';
 
+export const dynamic = 'force-dynamic';
+
 const reserveSchema = z.object({
   productId: z.string(),
   warehouseId: z.string(),
