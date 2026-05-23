@@ -84,7 +84,7 @@ export async function POST(
         });
 
         return updated;
-      });
+      }, { timeout: 15000 });
     } catch (txError) {
       if (txError instanceof Error && txError.message === 'NOT_PENDING') {
         // Fetch current status to return accurate message

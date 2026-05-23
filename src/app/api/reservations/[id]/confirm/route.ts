@@ -75,7 +75,7 @@ export async function POST(
                 }
               }
             });
-          });
+          }, { timeout: 15000 });
         } catch (err) {
           console.error(`[Confirm] Error doing lazy cleanup of expired reservation ${reservationId}:`, err);
         }
@@ -138,7 +138,7 @@ export async function POST(
         });
 
         return updated;
-      });
+      }, { timeout: 15000 });
     } catch (txError) {
       if (txError instanceof Error && txError.message === 'NOT_PENDING') {
         const responseBody = { error: 'Conflict', message: 'Reservation has already been processed' };

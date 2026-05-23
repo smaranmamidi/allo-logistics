@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Perform reservation in a database transaction with concurrency safeguards
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+    const expiresAt = new Date(Date.now() + 2 * 60 * 1000); // 2 minutes from now (for fast verification)
 
     let reservation;
     try {
@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
         });
 
         return res;
-      });
+      }, { timeout: 15000 });
     } catch (txError) {
       if (txError instanceof Error && txError.message === 'INSUFFICIENT_STOCK') {
         const responseBody = { error: 'Conflict', message: 'Not enough stock available in this warehouse' };

@@ -57,7 +57,7 @@ export async function releaseExpiredReservations(): Promise<number> {
         });
 
         releasedCount++;
-      });
+      }, { timeout: 15000 });
     } catch (err) {
       console.error(`[Cleanup] Failed to release expired reservation ${res.id}:`, err);
     }
