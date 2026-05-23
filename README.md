@@ -124,9 +124,31 @@ To build a zero-maintenance, highly resilient expiry worker, we implemented a **
   * Iterates through them, setting their status to `RELEASED` and decrementing `reservedStock` in `Inventory`.
   * **Benefit**: The client is guaranteed to see 100% correct inventory levels instantly, even if the cron job has a 1-minute latency.
 
-* **Active Background Cron (Guarantees Cleanup)**:
-  In production, a serverless Cron job (like Vercel Crons or a GitHub Action) triggers `POST /api/cron/cleanup` every 1 minute.
-  * **Benefit**: Cleans up abandoned reservations even during periods of low organic site traffic, ensuring database size and locks remain optimized.
+* **Active Background Cron (Secure & Free-Tier Friendly)**:
+  We have built a dedicated background sweep API at `POST /api/cron/cleanup` to release pending holds. Because native Vercel Cron jobs have strict limits or requirements, you can trigger this **completely for free** using standard external triggers:
+  
+  #### Option A: Free Trigger via Cron-Job.org (Easiest)
+  1. Set a `CRON_SECRET=your_secret_passphrase` in Vercel environment variables.
+  2. Create a free account at [cron-job.org](https://cron-job.org/).
+  3. Configure a job targeting `https://your-app.vercel.app/api/cron/cleanup?key=your_secret_passphrase` running every 1, 5, or 10 minutes.
+  
+  #### Option B: Free Trigger via GitHub Actions (Zero External Services)
+  Create a file `.github/workflows/cleanup-cron.yml` in your repo:
+  ```yaml
+  name: Stock Hold Expiry Sweep
+  on:
+    schedule:
+      - cron: "*/10 * * * *" # Every 10 minutes
+  jobs:
+    sweep:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Trigger Cleanup
+          run: |
+            curl -X POST https://your-app.vercel.app/api/cron/cleanup \
+              -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
+  ```
+  * **Benefit**: Cleans up abandoned reservations securely (authorized via your token header) during periods of zero organic traffic, without paying a cent.
 
 ---
 
