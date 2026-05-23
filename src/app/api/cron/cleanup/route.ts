@@ -4,8 +4,8 @@ import { releaseExpiredReservations } from '@/lib/cleanup';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
-  // Optional security: If a CRON_SECRET is configured in .env, enforce Authorization checking
-  const cronSecret = process.env.CRON_SECRET;
+  // Optional security: Check CRON_SECRET or CRON_KEY fallbacks
+  const cronSecret = process.env.CRON_SECRET || process.env.CRON_KEY;
   if (cronSecret && cronSecret.trim() !== '') {
     const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
     if (authHeader !== `Bearer ${cronSecret}`) {
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 // Support GET requests as well for easy pinging from simple external cron tools
 export async function GET(req: NextRequest) {
   // Reuse same security logic
-  const cronSecret = process.env.CRON_SECRET;
+  const cronSecret = process.env.CRON_SECRET || process.env.CRON_KEY;
   if (cronSecret && cronSecret.trim() !== '') {
     const url = new URL(req.url);
     const keyQuery = url.searchParams.get('key');
